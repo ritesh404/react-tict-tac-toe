@@ -1,8 +1,8 @@
 import K from "fp-kudojs";
 import daggy from "daggy";
 
-const { Maybe, caseOf } = K;
-const { Nothing, Just } = Maybe;
+const { Maybe } = K;
+const { Nothing } = Maybe;
 
 export const defaultBoard = [
   Nothing(),

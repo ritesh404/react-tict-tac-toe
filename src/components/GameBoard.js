@@ -11,7 +11,7 @@ import * as R from "ramda";
 import { playerToString } from "../lib/helpers";
 
 const { Maybe, caseOf } = K;
-const { Nothing, Just } = Maybe;
+const { Just } = Maybe;
 
 // Alias: Board = Array Int
 
@@ -31,7 +31,7 @@ export const togglePlayer = currentPlayer =>
   });
 
 // Board -> Array (Array Int) -> Array (Array Players | NoPlayer)
-export const cellValues = R.curry((board, winningCells) =>
+export const cellValues = R.curry((board, cells) =>
   R.map(
     R.map(cell =>
       caseOf(
@@ -42,7 +42,7 @@ export const cellValues = R.curry((board, winningCells) =>
         board[cell]
       )
     ),
-    winningCells
+    cells
   )
 );
 
@@ -67,13 +67,13 @@ export const getGameState = R.curry((board, currentPlayer, result) => {
   return GameState.Playable;
 });
 
-// Board -> GameState
-export const nextGameState = R.curry((board, currentPlayer) =>
+// Board -> Array (Array Int) -> GameState
+export const nextGameState = R.curry((board, cells, currentPlayer) =>
   R.compose(
     getGameState(board, currentPlayer),
     result(currentPlayer),
     cellValues
-  )(board, winningCells)
+  )(board, cells)
 );
 
 // TODO: Add Styling
@@ -109,7 +109,7 @@ const GameBoard = ({
 
                 K.compose(
                   setGameState,
-                  nextGameState(newBoard)
+                  nextGameState(newBoard, winningCells)
                 )(currentPlayer);
 
                 K.compose(

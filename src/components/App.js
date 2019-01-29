@@ -1,10 +1,8 @@
 import React from "react";
 import Header from "./Header";
-import GameBoard from "./GameBoard";
 import Footer from "./Footer";
 import { withState, compose } from "recompose";
 import { defaultBoard, Player, GameState } from "../lib/constants";
-import { playerToString } from "../lib/helpers";
 import GameSection from "./GameSection";
 
 const enhance = compose(
