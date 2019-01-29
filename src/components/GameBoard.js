@@ -39,9 +39,8 @@ const BoardCell = ({ value, onClick = K.id }) => (
   </div>
 );
 
-// Board => GameState
-const nextGameState = R.curry((board, currentPlayer) => {
-  const cellValues = R.map(
+const cellValues = R.curry((board, winningCells) =>
+  R.map(
     R.map(cell =>
       caseOf(
         {
@@ -52,17 +51,20 @@ const nextGameState = R.curry((board, currentPlayer) => {
       )
     ),
     winningCells
-  );
+  )
+);
 
-  const result = R.compose(
+const result = currentPlayer =>
+  R.compose(
     R.any(v => v === true),
     R.map(
       R.all(player => {
         return currentPlayer.toString() === player;
       })
     )
-  )(cellValues);
+  );
 
+const getGameState = R.curry((board, currentPlayer, result) => {
   if (result === false && Maybe.catMaybes(board).length === 9) {
     return GameState.Draw;
   } else if (result === true) {
@@ -70,6 +72,15 @@ const nextGameState = R.curry((board, currentPlayer) => {
   }
   return GameState.Playable;
 });
+
+// Board => GameState
+const nextGameState = R.curry((board, currentPlayer) =>
+  R.compose(
+    getGameState(board, currentPlayer),
+    result(currentPlayer),
+    cellValues
+  )(board, winningCells)
+);
 
 const GameBoard = ({
   board = defaultBoard,
@@ -79,41 +90,38 @@ const GameBoard = ({
   gameState,
   setGameState
 }) => (
-  <div className="game-section">
-    <div className="game-board">
-      {board.map((cell, index) =>
-        caseOf(
-          {
-            Just: value => <BoardCell key={`cell-${index}`} value={value} />,
-            Nothing: _ => (
-              <BoardCell
-                key={`cell-${index}`}
-                onClick={_ => {
-                  const newBoard = updatePosition(
-                    index,
-                    currentPlayer,
-                    setBoard,
-                    board
-                  );
+  <div className="game-board">
+    {board.map((cell, index) =>
+      caseOf(
+        {
+          Just: value => <BoardCell key={`cell-${index}`} value={value} />,
+          Nothing: _ => (
+            <BoardCell
+              key={`cell-${index}`}
+              onClick={_ => {
+                const newBoard = updatePosition(
+                  index,
+                  currentPlayer,
+                  setBoard,
+                  board
+                );
 
-                  K.compose(
-                    setGameState,
-                    nextGameState(newBoard)
-                  )(currentPlayer);
+                K.compose(
+                  setGameState,
+                  nextGameState(newBoard)
+                )(currentPlayer);
 
-                  K.compose(
-                    setCurrentPlayer,
-                    togglePlayer
-                  )(currentPlayer);
-                }}
-                value={"x"}
-              />
-            )
-          },
-          cell
-        )
-      )}
-    </div>
+                K.compose(
+                  setCurrentPlayer,
+                  togglePlayer
+                )(currentPlayer);
+              }}
+            />
+          )
+        },
+        cell
+      )
+    )}
   </div>
 );
 
