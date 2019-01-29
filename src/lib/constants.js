@@ -32,6 +32,9 @@ export const Player = daggy.taggedSum("Player", {
   O: []
 });
 
+// Note: We create NoPlayer separate from Player to avoid impossible state where in
+// the current turn would be for NoPlayer
+// NoPlayer is used only to evaluate to value of a Cell
 export const NoPlayer = daggy.tagged("NoPlayer", []);
 
 export const GameState = daggy.taggedSum("GameState", {

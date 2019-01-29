@@ -8,38 +8,30 @@ import {
   GameState
 } from "../lib/constants";
 import * as R from "ramda";
+import { playerToString } from "../lib/helpers";
 
 const { Maybe, caseOf } = K;
 const { Nothing, Just } = Maybe;
 
-// (Int, Player, Board => Board, Board) => Board
-const updatePosition = (index, value, updateFn, board) => {
+// Alias: Board = Array Int
+
+// (Int, Player, Board -> Board, Board) -> Board
+export const updatePosition = R.curry((index, value, updateFn, board) => {
   const newBoard = [...board];
   newBoard[index] = Just(value);
   updateFn(newBoard);
   return newBoard;
-};
+});
 
-// Player => Player
-const togglePlayer = currentPlayer =>
+// Player -> Player
+export const togglePlayer = currentPlayer =>
   currentPlayer.cata({
     X: _ => Player.O,
     O: _ => Player.X
   });
 
-// TODO: Add Styling
-const BoardCell = ({ value, onClick = K.id }) => (
-  <div onClick={onClick} className="board-cell">
-    {Player.is(value)
-      ? value.cata({
-          X: _ => "X",
-          O: _ => "O"
-        })
-      : ""}
-  </div>
-);
-
-const cellValues = R.curry((board, winningCells) =>
+// Board -> Array (Array Int) -> Array (Array Players | NoPlayer)
+export const cellValues = R.curry((board, winningCells) =>
   R.map(
     R.map(cell =>
       caseOf(
@@ -54,7 +46,8 @@ const cellValues = R.curry((board, winningCells) =>
   )
 );
 
-const result = currentPlayer =>
+// Player -> Array (Array Players | NoPlayer) -> Booloean
+export const result = currentPlayer =>
   R.compose(
     R.any(v => v === true),
     R.map(
@@ -64,7 +57,8 @@ const result = currentPlayer =>
     )
   );
 
-const getGameState = R.curry((board, currentPlayer, result) => {
+// Board -> Player -> Boolean -> GameState
+export const getGameState = R.curry((board, currentPlayer, result) => {
   if (result === false && Maybe.catMaybes(board).length === 9) {
     return GameState.Draw;
   } else if (result === true) {
@@ -73,13 +67,20 @@ const getGameState = R.curry((board, currentPlayer, result) => {
   return GameState.Playable;
 });
 
-// Board => GameState
-const nextGameState = R.curry((board, currentPlayer) =>
+// Board -> GameState
+export const nextGameState = R.curry((board, currentPlayer) =>
   R.compose(
     getGameState(board, currentPlayer),
     result(currentPlayer),
     cellValues
   )(board, winningCells)
+);
+
+// TODO: Add Styling
+const BoardCell = ({ value, onClick = K.id }) => (
+  <div onClick={onClick} className="board-cell">
+    {Player.is(value) ? playerToString(value) : ""}
+  </div>
 );
 
 const GameBoard = ({

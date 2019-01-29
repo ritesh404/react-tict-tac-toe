@@ -4,6 +4,8 @@ import GameBoard from "./GameBoard";
 import Footer from "./Footer";
 import { withState, compose } from "recompose";
 import { defaultBoard, Player, GameState } from "../lib/constants";
+import { playerToString } from "../lib/helpers";
+import GameSection from "./GameSection";
 
 const enhance = compose(
   withState("currentPlayer", "setCurrentPlayer", Player.X),
@@ -11,7 +13,7 @@ const enhance = compose(
   withState("gameState", "setGameState", GameState.Playable)
 );
 
-// TODO: Get rid of prop drilling (Use redux or react Context)
+// TODO: Get rid of prop drilling (Use redux(or any state management tool) or react Context)
 const App = ({
   currentPlayer,
   setCurrentPlayer,
@@ -21,24 +23,15 @@ const App = ({
   setGameState
 }) => (
   <div className="App">
-    <Header currentPlayer={currentPlayer} />
-    <div className="game-section">
-      {gameState.cata({
-        Playable: _ => (
-          <GameBoard
-            board={board}
-            setBoard={setBoard}
-            currentPlayer={currentPlayer}
-            setCurrentPlayer={setCurrentPlayer}
-            gameState={gameState}
-            setGameState={setGameState}
-          />
-        ),
-        Win: player => `${player} Won!`,
-        Draw: _ => "Its a Draw!"
-      })}
-    </div>
-
+    <Header currentPlayer={currentPlayer} gameState={gameState} />
+    <GameSection
+      board={board}
+      setBoard={setBoard}
+      currentPlayer={currentPlayer}
+      setCurrentPlayer={setCurrentPlayer}
+      gameState={gameState}
+      setGameState={setGameState}
+    />
     <Footer
       onReset={_ => {
         setGameState(GameState.Playable);

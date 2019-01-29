@@ -1,11 +1,12 @@
 import React from "react";
+import { playerToString } from "../lib/helpers";
 
-const Header = ({ currentPlayer }) => (
+const Header = ({ currentPlayer, gameState }) => (
   <div className="header">
-    Current Player:{" "}
-    {currentPlayer.cata({
-      X: _ => "X",
-      O: _ => "O"
+    {gameState.cata({
+      Playable: _ => `Current Player: ${playerToString(currentPlayer)}`,
+      Win: _ => "Congratulations!",
+      Draw: _ => "Game has concluded!"
     })}
   </div>
 );
