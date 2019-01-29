@@ -2,13 +2,16 @@ import React, { Component } from "react";
 import Header from "./Header";
 import GameBoard from "./GameBoard";
 import Footer from "./Footer";
+import { withState, compose } from "recompose";
 
-const App = () => (
+const enhance = compose(withState("currentPlayer", "setCurrentPlayer", "X"));
+
+const App = ({ currentPlayer, setCurrentPlayer }) => (
   <div className="App">
-    <Header />
+    <Header currentPlayer={currentPlayer} />
     <GameBoard />
     <Footer />
   </div>
 );
 
-export default App;
+export default enhance(App);

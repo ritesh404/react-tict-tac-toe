@@ -1,5 +1,7 @@
 import React from "react";
 
-const Header = () => <div>Header</div>;
+const Header = ({ currentPlayer }) => (
+  <div className="header">Current Player: {currentPlayer}</div>
+);
 
 export default Header;
