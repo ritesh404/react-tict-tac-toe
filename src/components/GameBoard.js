@@ -1,23 +1,35 @@
 import React from "react";
 import K from "fp-kudojs";
-import { defaultBoard } from "../lib/constants";
+import { defaultBoard, Player } from "../lib/constants";
 
 const { Maybe, caseOf } = K;
 const { Nothing, Just } = Maybe;
 
-const BoardCell = ({ value = "", onClick = K.id }) => (
-  <div onClick={onClick} className="board-cell">
-    {value}
-  </div>
-);
-
+// (Int, Player, Board => Board, Board) => Board
 const updatePosition = (index, value, updateFn, board) => {
   const newBoard = [...board];
   newBoard[index] = Just(value);
   updateFn(newBoard);
 };
 
-const togglePlayer = currentPlayer => (currentPlayer === "X" ? "O" : "X");
+// Player => Player
+const togglePlayer = currentPlayer =>
+  currentPlayer.cata({
+    X: _ => Player.O,
+    O: _ => Player.X
+  });
+
+// TODO: Add Styling
+const BoardCell = ({ value, onClick = K.id }) => (
+  <div onClick={onClick} className="board-cell">
+    {Player.is(value)
+      ? value.cata({
+          X: _ => "X",
+          O: _ => "O"
+        })
+      : ""}
+  </div>
+);
 
 const GameBoard = ({
   board = defaultBoard,
@@ -30,9 +42,10 @@ const GameBoard = ({
       {board.map((cell, index) =>
         caseOf(
           {
-            Just: value => <BoardCell value={value} />,
+            Just: value => <BoardCell key={`cell-${index}`} value={value} />,
             Nothing: _ => (
               <BoardCell
+                key={`cell-${index}`}
                 onClick={_ => {
                   updatePosition(index, currentPlayer, setBoard, board);
                   K.compose(
