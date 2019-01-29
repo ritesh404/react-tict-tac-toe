@@ -46,7 +46,12 @@ const App = ({
       ),
       Win: player => `${player} Won!`
     })}
-    <Footer />
+    <Footer
+      onReset={_ => {
+        setGameState(GameState.Playable);
+        setBoard(defaultBoard);
+      }}
+    />
   </div>
 );
 
