@@ -76,6 +76,30 @@ export const nextGameState = R.curry((board, cells, currentPlayer) =>
   )(board, cells)
 );
 
+// IMPURE function called to update the state and set the new gamestate and player
+export const onBoardCellCick = ({
+  index,
+  setGameState,
+  setCurrentPlayer,
+  currentPlayer,
+  setBoard,
+  board,
+  winningCells
+}) => {
+  const newBoard = updatePosition(index, currentPlayer, setBoard, board);
+  // Update the game state and toggle the player. this sequence has to be maintained
+  K.compose(
+    setCurrentPlayer,
+    togglePlayer,
+    R.tap(
+      K.compose(
+        setGameState,
+        nextGameState(newBoard, winningCells)
+      )
+    )
+  )(currentPlayer);
+};
+
 // TODO: Add Styling
 const BoardCell = ({ value, onClick = K.id }) => (
   <div onClick={onClick} className="board-cell">
@@ -88,7 +112,6 @@ const GameBoard = ({
   setBoard,
   currentPlayer,
   setCurrentPlayer,
-  gameState,
   setGameState
 }) => (
   <div className="game-board">
@@ -99,24 +122,17 @@ const GameBoard = ({
           Nothing: _ => (
             <BoardCell
               key={`cell-${index}`}
-              onClick={_ => {
-                const newBoard = updatePosition(
+              onClick={_ =>
+                onBoardCellCick({
                   index,
+                  setGameState,
+                  setCurrentPlayer,
                   currentPlayer,
                   setBoard,
-                  board
-                );
-
-                K.compose(
-                  setGameState,
-                  nextGameState(newBoard, winningCells)
-                )(currentPlayer);
-
-                K.compose(
-                  setCurrentPlayer,
-                  togglePlayer
-                )(currentPlayer);
-              }}
+                  board,
+                  winningCells
+                })
+              }
             />
           )
         },
